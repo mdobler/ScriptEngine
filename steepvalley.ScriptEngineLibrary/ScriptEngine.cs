@@ -39,7 +39,6 @@ namespace steepvalley.ScriptEngineLibrary
                     connection.Open();
                     return true;
                 }
-                return false;
             }
             catch (Exception)
             {
@@ -243,6 +242,18 @@ namespace steepvalley.ScriptEngineLibrary
 
                 SqlDataReader reader = command.ExecuteReader();
                 DataTable schemaTable = reader.GetSchemaTable();
+
+                if (updateFields?.Count() == 0)
+                {
+                    List<string> _fields = new List<string>();
+                    _fields.AddRange(GetArrayOfFields(schemaTable));
+                    foreach (var key in keys)
+                    {
+                        _fields.Remove(key);
+                    }
+
+                    updateFields = _fields.ToArray();   
+                }
 
                 while (reader.Read())
                 {
@@ -448,17 +459,13 @@ namespace steepvalley.ScriptEngineLibrary
                     string content = value.ToString().Replace("'", "''");
                     content = content.Replace("\n", "").Replace("\r", "");
                     return $"'{content}'";
-                    break;
                 case "uniqueidentifier":
                 case "image":
                     return $"'{value.ToString().Replace("'", "''")}'";
-                    break;
                 case "datetime":
                     return $"'{((DateTime)value).ToString("o")}'";
-                    break;
                 default:
                     return value.ToString();
-                    break;
             }
 
         }
