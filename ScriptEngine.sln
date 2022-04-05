@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32228.343
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "steepvalley.ScriptEngineLibrary", "steepvalley.ScriptEngineLibrary\steepvalley.ScriptEngineLibrary.csproj", "{42CECEB9-ECED-472D-B3CB-08B33B65B1B5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scripter", "Scripter\Scripter.csproj", "{6CA9D062-D178-4F1D-8907-038E4B7598E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "steepvalley.ScriptEngineLibrary.UnitTests", "steepvalley.ScriptEngineLibrary.UnitTests\steepvalley.ScriptEngineLibrary.UnitTests.csproj", "{40857980-CAD7-4C38-81C0-4CEFDEFA21CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{6CA9D062-D178-4F1D-8907-038E4B7598E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CA9D062-D178-4F1D-8907-038E4B7598E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CA9D062-D178-4F1D-8907-038E4B7598E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40857980-CAD7-4C38-81C0-4CEFDEFA21CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40857980-CAD7-4C38-81C0-4CEFDEFA21CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40857980-CAD7-4C38-81C0-4CEFDEFA21CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40857980-CAD7-4C38-81C0-4CEFDEFA21CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
