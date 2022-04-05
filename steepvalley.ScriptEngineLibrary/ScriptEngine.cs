@@ -30,6 +30,11 @@ namespace steepvalley.ScriptEngineLibrary
             return builder.ConnectionString;
         }
 
+        /// <summary>
+        /// checks if connection is valid
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <returns></returns>
         public static bool CanConnect(string connectionString)
         {
             try
@@ -120,7 +125,8 @@ namespace steepvalley.ScriptEngineLibrary
             string whereClause,
             string orderClause,
             string connectionString,
-            bool hardcodeValues)
+            bool hardcodeValues, 
+            Dictionary<string, string>? valueReplacements = null)
         {
             StringBuilder output = new StringBuilder();
 
@@ -138,7 +144,7 @@ namespace steepvalley.ScriptEngineLibrary
                 while (reader.Read())
                 {
                     var recordWhere = CreateWhereClause((IDataRecord)reader, keys, schemaTable);
-                    var recordSelect = CreateSelectClause((IDataRecord)reader, hardcodeValues, schemaTable);
+                    var recordSelect = CreateSelectClause((IDataRecord)reader, hardcodeValues, schemaTable, valueReplacements);
 
                     output.Append($"select {recordSelect}");
 
@@ -170,7 +176,8 @@ namespace steepvalley.ScriptEngineLibrary
             string whereClause,
             string orderClause,
             string connectionString,
-            bool checkIfExists = false)
+            bool checkIfExists = false, 
+            Dictionary<string, string>? valueReplacements = null)
         {
             StringBuilder output = new StringBuilder();
 
@@ -195,7 +202,7 @@ namespace steepvalley.ScriptEngineLibrary
                         output.AppendLine($"if not exists (select 1 from {tableName} where {recordWhere})");
                         output.AppendLine("begin");
                     }
-                    var valuesClause = CreateValuesClause((IDataRecord)reader, schemaTable);
+                    var valuesClause = CreateValuesClause((IDataRecord)reader, schemaTable, valueReplacements);
                     output.AppendLine($"insert into {tableName} ({insertClause}) values ({valuesClause})");
                     if (checkIfExists)
                     {
@@ -228,7 +235,8 @@ namespace steepvalley.ScriptEngineLibrary
             string whereClause,
             string orderClause,
             string connectionString,
-            bool checkIfExists = false)
+            bool checkIfExists = false, 
+            Dictionary<string, string>? valueReplacements = null)
         {
             StringBuilder output = new StringBuilder();
 
@@ -264,7 +272,7 @@ namespace steepvalley.ScriptEngineLibrary
                         output.AppendLine($"if exists (select 1 from {tableName} where {recordWhere})");
                         output.AppendLine("begin");
                     }
-                    var updateClause = CreateUpdateClause((IDataRecord)reader, updateFields, schemaTable);
+                    var updateClause = CreateUpdateClause((IDataRecord)reader, updateFields, schemaTable, valueReplacements);
                     output.AppendLine($"update {tableName} set {updateClause} where {recordWhere}");
                     if (checkIfExists)
                     {
@@ -361,18 +369,23 @@ namespace steepvalley.ScriptEngineLibrary
             
         }
 
-        public static string CreateSelectClause(IDataRecord dataRecord, bool hardcodeValues, DataTable schemaTable)
+        public static string CreateSelectClause(IDataRecord dataRecord, bool hardcodeValues, DataTable schemaTable, Dictionary<string, string>? valueReplacements = null)
         {
             StringBuilder selectclause = new StringBuilder();
+            var valueReplacementsCI = GetCaseAgnosticDictionary(valueReplacements);
             foreach (var field in schemaTable.Rows.Cast<DataRow>())
-            { 
+            {
+                string columnName = $"{field["ColumnName"]}";
                 if (selectclause.Length != 0) { selectclause.Append(", "); }
-                if (hardcodeValues)
+                if (valueReplacementsCI?.ContainsKey(columnName) == true)
+                {
+                    selectclause.Append($"{valueReplacementsCI[columnName]} AS ");
+                }
+                else if (hardcodeValues)
                 {
                     selectclause.Append($"{FormatValue(dataRecord[(int)field["ColumnOrdinal"]], field["DataTypeName"].ToString())} AS ");
-
                 }
-                selectclause.Append($"[{field["ColumnName"]}]");
+                selectclause.Append($"[{columnName}]");
             }
             return selectclause.ToString();
         }
@@ -388,20 +401,31 @@ namespace steepvalley.ScriptEngineLibrary
             return insertclause.ToString();
         }
 
-        public static string CreateValuesClause(IDataRecord dataRecord, DataTable schemaTable)
+        public static string CreateValuesClause(IDataRecord dataRecord, DataTable schemaTable, Dictionary<string, string>? valueReplacements = null)
         {
             StringBuilder selectclause = new StringBuilder();
+            var valueReplacementsCI = GetCaseAgnosticDictionary(valueReplacements);
             foreach (var field in schemaTable.Rows.Cast<DataRow>())
             {
+                string columnName = $"{field["ColumnName"]}";
                 if (selectclause.Length != 0) { selectclause.Append(", "); }
-                selectclause.Append($"{FormatValue(dataRecord[(int)field["ColumnOrdinal"]], field["DataTypeName"].ToString())}");
+                if (valueReplacementsCI?.ContainsKey(columnName) == true)
+                {
+                    selectclause.Append($"{valueReplacementsCI[columnName]}");
+                }
+                else
+                { 
+                    selectclause.Append($"{FormatValue(dataRecord[(int)field["ColumnOrdinal"]], field["DataTypeName"].ToString())}");
+                }
+
             }
             return selectclause.ToString();
         }
 
-        public static string CreateUpdateClause(IDataRecord dataRecord, string[] updateFields, DataTable schemaTable)
+        public static string CreateUpdateClause(IDataRecord dataRecord, string[] updateFields, DataTable schemaTable, Dictionary<string, string>? valueReplacements = null)
         {
-            StringBuilder whereclause = new StringBuilder();
+            StringBuilder updateclause = new StringBuilder();
+            var valueReplacementsCI = GetCaseAgnosticDictionary(valueReplacements);
             foreach (string key in updateFields)
             {
                 var field = schemaTable.Rows
@@ -410,11 +434,18 @@ namespace steepvalley.ScriptEngineLibrary
                                     .Equals(key, StringComparison.InvariantCultureIgnoreCase))
                                 .FirstOrDefault();
 
-                if (whereclause.Length != 0) { whereclause.Append(", "); }
-                whereclause.Append($"[{field["ColumnName"]}] = {FormatValue(dataRecord[(int)field["ColumnOrdinal"]], field["DataTypeName"].ToString())}");
+                if (updateclause.Length != 0) { updateclause.Append(", "); }
+                if (valueReplacementsCI?.ContainsKey(key) == true)
+                {
+                    updateclause.Append($"[{field["ColumnName"]}] = {valueReplacementsCI[key]}");
+                }
+                else
+                {
+                    updateclause.Append($"[{field["ColumnName"]}] = {FormatValue(dataRecord[(int)field["ColumnOrdinal"]], field["DataTypeName"].ToString())}");
+                }
             }
 
-            return whereclause.ToString();
+            return updateclause.ToString();
         }
 
 
@@ -487,6 +518,12 @@ namespace steepvalley.ScriptEngineLibrary
                 reader.Close();
             }
             return retval.ToArray();
+        }
+
+        private static Dictionary<string, string> GetCaseAgnosticDictionary(Dictionary<string, string>? dict = null)
+        {
+            if (dict == null) { return new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase); }
+            else { return new Dictionary<string, string>(dict, StringComparer.InvariantCultureIgnoreCase); }
         }
     }
 }

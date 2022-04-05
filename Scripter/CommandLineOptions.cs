@@ -35,6 +35,8 @@ namespace Scripter
 
 		[Option('l', "location", HelpText = "file location to write to")]
 		public string FileName { get; set; } = "";
+
+		
 	}
 
 	[Verb("selects", HelpText="creates select statements")]
@@ -42,6 +44,10 @@ namespace Scripter
 	{
 		[Option('h', "hardcode", HelpText = "hard code values")]
 		public bool HardCodeValues { get; set; } = true;
+
+		[Option('v', "replace", HelpText = "a key value pair list of fieldnames and their replacements")]
+		public IEnumerable<string> ValueReplacements { get; set; } = new List<string>();
+
 	}
 
 	[Verb("inserts", HelpText="creates insert statements")]
@@ -49,6 +55,10 @@ namespace Scripter
 	{
 		[Option('x', "exists", HelpText = "checks if exists")]
 		public bool CheckIfExists { get; set; } = true;
+
+		[Option('v', "replace", HelpText = "a key value pair list of fieldnames and their replacements")]
+		public IEnumerable<string> ValueReplacements { get; set; } = new List<string>();
+
 	}
 
 	[Verb("updates", HelpText="creates update statements")]
@@ -59,6 +69,10 @@ namespace Scripter
 
 		[Option('x', "exists", HelpText = "checks if exists")]
 		public bool CheckIfExists { get; set; } = true;
+
+		[Option('v', "replace", HelpText = "a key value pair list of fieldnames and their replacements")]
+		public IEnumerable<string> ValueReplacements { get; set; } = new List<string>();
+
 	}
 
 	[Verb("deletes", HelpText="creates delete statements")]

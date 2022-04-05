@@ -12,9 +12,7 @@ namespace Scripter
 
             int result = 0;
 
-            result = Parser.Default.ParseArguments<BaseOptions>(args)
-                .MapResult(options => CheckConnection(options), _ => 1);
-
+            
             Parser.Default.ParseArguments<SelectsOptions, InsertsOptions, UpdatesOptions, DeletesOptions>(args)
                 .MapResult(
                     (SelectsOptions options) => RunCreateSelectStatements(options),
@@ -29,26 +27,33 @@ namespace Scripter
 
         private static int RunCreateSelectStatements(SelectsOptions options)
         {
+            if (CheckConnection(options) == 1) { return 1; }
+
+            var replacements = ListToDict(options.ValueReplacements);
             var output = ScriptEngine.CreateSelectStatement(
                             options.TableName,
                             options.Keys.ToArray(),
                             options.WhereClause,
                             options.OrderClause,
                             GetConnection(options),
-                            options.HardCodeValues);
+                            options.HardCodeValues,
+                            replacements);
 
             return WriteToFile(options.FileName, output);
         }
 
         private static int RunCreateInsertStatements(InsertsOptions options)
         {
+            if (CheckConnection(options) == 1) { return 1; }
+            var replacements = ListToDict(options.ValueReplacements);
             var output = ScriptEngine.CreateInsertStatement(
                             options.TableName,
                             options.Keys.ToArray(),
                             options.WhereClause,
                             options.OrderClause,
                             GetConnection(options),
-                            options.CheckIfExists);
+                            options.CheckIfExists,
+                            replacements);
 
             return WriteToFile(options.FileName, output);
 
@@ -56,6 +61,8 @@ namespace Scripter
 
         private static int RunCreateUpdateStatements(UpdatesOptions options)
         {
+            if (CheckConnection(options) == 1) { return 1; }
+            var replacements = ListToDict(options.ValueReplacements);
             var output = ScriptEngine.CreateUpdateStatement(
                             options.TableName,
                             options.Keys.ToArray(),
@@ -63,12 +70,14 @@ namespace Scripter
                             options.WhereClause,
                             options.OrderClause,
                             GetConnection(options),
-                            options.CheckIfExists);
+                            options.CheckIfExists,
+                            replacements);
             return WriteToFile(options.FileName, output);
         }
 
         private static int RunCreateDeletesStatements(DeletesOptions options)
         {
+            if (CheckConnection(options) == 1) { return 1; }
             var output = ScriptEngine.CreateDeleteStatement(
                             options.TableName,
                             options.Keys.ToArray(),
@@ -86,6 +95,7 @@ namespace Scripter
             {
                 //System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(filename));
                 System.IO.File.WriteAllText(filename, output);
+                Console.WriteLine($"Script File has been created at {filename}");
                 return 1;
             }
             catch (Exception ex)
@@ -135,6 +145,22 @@ namespace Scripter
                 retval = options.ConnectionString;
             }
             return retval;
+        }
+
+        private static Dictionary<string, string> ListToDict(IEnumerable<string> list)
+        {
+            var dict = new Dictionary<string, string>();
+            if (list?.Count() == 0) { return dict; }
+
+            if (list?.Count() % 2 == 0)
+            {
+                for (int i = 0; i < list.Count(); i += 2)
+                {
+                    dict.Add(list.ElementAt(i), list.ElementAt(i + 1));
+                }
+            }
+
+            return dict;
         }
     }
 }
