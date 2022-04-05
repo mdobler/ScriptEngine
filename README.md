@@ -36,6 +36,8 @@
   -o, --orderclause         order clause to sort output
 
   -l, --location            file location to write to
+  
+  -v, --replace             a key-value list that replaces the value of a specific field with the provided value (e.g. "PKEY" "replace(newid(), '-', '')"
 
   --help                    Display this help screen.
 
@@ -72,6 +74,8 @@
   -o, --orderclause         order clause to sort output
 
   -l, --location            file location to write to
+  
+  -v, --replace             a key-value list that replaces the value of a specific field with the provided value (e.g. "PKEY" "replace(newid(), '-', '')"
 
   --help                    Display this help screen.
 
@@ -140,6 +144,8 @@
   -o, --orderclause         order clause to sort output
 
   -l, --location            file location to write to
+  
+  -v, --replace             a key-value list that replaces the value of a specific field with the provided value (e.g. "PKEY" "replace(newid(), '-', '')"
 
   --help                    Display this help screen.
 
