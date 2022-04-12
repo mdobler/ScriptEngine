@@ -54,7 +54,7 @@ namespace Scripter
 	public class InsertsOptions : BaseOptions
 	{
 		[Option('x', "exists", HelpText = "checks if exists")]
-		public bool CheckIfExists { get; set; } = true;
+		public bool CheckIfExists { get; set; } = false;
 
 		[Option('v', "replace", HelpText = "a key value pair list of fieldnames and their replacements")]
 		public IEnumerable<string> ValueReplacements { get; set; } = new List<string>();

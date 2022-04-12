@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Scripter": {
+      "commandName": "Project",
+      "commandLineArgs": "inserts --server \"db-server\" --database \"VisionDemo76\" --user \"sa\" --password \"D0ntpanic@SV\" --tablename \"CFGBankTextFormat\" --keys \"PKey\" --whereclause \"BankCode = 'BACS'\" --location \"BACSBankFormat.sql\" --replace \"PKey\" \"replace(newid(), '-', '')\" \"BankCode\" \"@BankCode\" -x"
+    }
+  }
+}
